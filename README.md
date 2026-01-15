@@ -1,6 +1,6 @@
-# Apolo Academy LMS System
+# LAPREGILDA - Centro de Preparación Académica
 
-Este proyecto es un sistema de gestión de aprendizaje (LMS) diseñado para academias pre-universitarias e institutos.
+Sistema de gestión de aprendizaje (LMS) para el **Centro de Preparación Académica LAPREGILDA**, especializado en la preparación para el examen de admisión del **IESTP Gilda Ballivián Rosado**.
 
 ## Características
 - **Módulo Administrativo**: Gestión de cursos, currículum, estudiantes y analíticas.
@@ -71,3 +71,7 @@ Crea las siguientes tablas en tu base de datos de Supabase:
 npm install
 npm run dev
 ```
+
+---
+
+**LAPREGILDA** - Preparándote para tu futuro en el IESTP Gilda Ballivián Rosado

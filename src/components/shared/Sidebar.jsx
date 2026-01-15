@@ -7,7 +7,8 @@ const Sidebar = () => {
     return (
         <aside className="sidebar glass-card">
             <div className="sidebar-header">
-                <h2 className="gradient-text">Apolo Admin</h2>
+                <h2 className="gradient-text">LAPREGILDA</h2>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Admin</p>
             </div>
             <nav className="sidebar-nav">
                 <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>

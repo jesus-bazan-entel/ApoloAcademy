@@ -17,7 +17,7 @@ const AdminDashboard = () => {
         <div className="dashboard-content animate-fade-in">
             <header className="page-header">
                 <h1>Dashboard Administrativo</h1>
-                <p>Vista general del rendimiento de Apolo Academy</p>
+                <p>Vista general del rendimiento de LAPREGILDA</p>
             </header>
 
             <div className="stats-grid">

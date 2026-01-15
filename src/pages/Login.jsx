@@ -51,9 +51,14 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-card glass-card animate-fade-in">
-                <h1 className="gradient-text">Apolo Academy</h1>
+                <div className="logo-container">
+                    <img src="/logo-lapregilda.jpg" alt="LAPREGILDA" className="login-logo" />
+                </div>
+                <h1 className="gradient-text">LAPREGILDA</h1>
                 <p className="subtitle">
-                    {isRegistering ? 'Crea tu cuenta de estudiante' : 'Bienvenido al futuro de la educación'}
+                    {isRegistering
+                        ? 'Crea tu cuenta de estudiante'
+                        : 'Centro de Preparación Académica - IESTP Gilda Ballivián Rosado'}
                 </p>
 
                 <form onSubmit={handleAuth}>
