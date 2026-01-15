@@ -11,6 +11,7 @@ import MyCourses from './pages/student/MyCourses';
 import LessonPlayer from './pages/student/LessonPlayer';
 import Login from './pages/Login';
 import { supabase } from './lib/supabase';
+import { isMobile, getDeviceType } from './pwa';
 
 function App() {
     const [session, setSession] = useState(null);
@@ -22,24 +23,52 @@ function App() {
     useEffect(() => {
         console.log("🚀 App initializing...");
 
+        // Handle OAuth callback hash fragment
+        const handleOAuthCallback = async () => {
+            const hashParams = window.location.hash;
+            if (hashParams && hashParams.includes('access_token')) {
+                console.log("🔑 OAuth callback detected, processing tokens...");
+
+                // Parse the hash fragment
+                const params = new URLSearchParams(hashParams.substring(1));
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+
+                if (accessToken) {
+                    console.log("🔐 Setting session from OAuth tokens...");
+                    const { data, error } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken || ''
+                    });
+
+                    if (error) {
+                        console.error("❌ Error setting session:", error);
+                        return null;
+                    }
+
+                    console.log("✅ OAuth session established successfully");
+                    // Clear the hash from URL
+                    window.history.replaceState(null, '', window.location.pathname);
+                    return data.session;
+                }
+            }
+            return null;
+        };
+
         const initSession = async () => {
             try {
-                // Check if we have an OAuth callback with hash fragment
-                const hashParams = window.location.hash;
-                if (hashParams && hashParams.includes('access_token')) {
-                    console.log("🔑 OAuth callback detected, processing tokens...");
-                    // Supabase will automatically handle the hash fragment
-                    // We just need to wait for it to process
-                    const { data, error: hashError } = await supabase.auth.getSession();
-                    if (hashError) {
-                        console.error("❌ Error processing OAuth callback:", hashError);
-                    } else if (data.session) {
-                        console.log("✅ OAuth session established");
-                        // Clear the hash from URL for cleaner appearance
-                        window.history.replaceState(null, '', window.location.pathname);
-                    }
+                // First, check if this is an OAuth callback
+                const oauthSession = await handleOAuthCallback();
+
+                if (oauthSession) {
+                    console.log("✅ Using OAuth session");
+                    setSession(oauthSession);
+                    await fetchUserRole(oauthSession.user.id);
+                    setInitializing(false);
+                    return;
                 }
 
+                // Otherwise, check for existing session
                 console.log("📡 Checking Supabase connection...");
                 const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -129,7 +158,14 @@ function App() {
     const isStudent = userRole === 'student';
     const isAuthPage = location.pathname === '/login';
 
-    console.log("🎯 Current state:", { initializing, session: !!session, userRole, isAdmin, isStudent, isAuthPage });
+    console.log("🎯 Current state:", { initializing, session, userRole, isAdmin, isStudent, isAuthPage });
+    if (error) {
+        console.error("[ERROR]", error);
+    }
+    if (!initializing) {
+        console.log("[SESSION]", session);
+        console.log("[USER ROLE]", userRole);
+    }
 
     if (initializing) {
         return (
@@ -165,6 +201,21 @@ function App() {
                         {error}
                     </div>
                 )}
+                <div style={{
+                    marginTop: '2rem',
+                    padding: '1rem',
+                    background: 'rgba(30, 41, 59, 0.5)',
+                    borderRadius: '8px',
+                    maxWidth: '500px',
+                    color: '#fbbf24',
+                    fontSize: '0.95rem',
+                    textAlign: 'left'
+                }}>
+                    <strong>Debug info:</strong><br />
+                    <pre style={{ color: '#fbbf24', fontSize: '0.85rem', overflowX: 'auto' }}>
+                        {JSON.stringify({ initializing, session, userRole, error }, null, 2)}
+                    </pre>
+                </div>
             </div>
         );
     }

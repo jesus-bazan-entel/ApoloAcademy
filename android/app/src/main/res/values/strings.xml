@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ApoloAcademy</string>
+    <string name="title_activity_main">ApoloAcademy</string>
+    <string name="package_name">com.apoloacademy.app</string>
+    <string name="custom_url_scheme">com.apoloacademy.app</string>
+</resources>
