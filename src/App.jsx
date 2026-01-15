@@ -1,171 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/shared/Sidebar';
-import MobileNav from './components/shared/MobileNav';
 import AdminDashboard from './pages/admin/Dashboard';
 import CourseManagement from './pages/admin/CourseManagement';
 import UserManagement from './pages/admin/UserManagement';
+import TeacherManagement from './pages/admin/TeacherManagement';
 import CurriculumBuilder from './pages/admin/CurriculumBuilder';
-import StudentHome from './pages/student/Home';
-import MyCourses from './pages/student/MyCourses';
-import LessonPlayer from './pages/student/LessonPlayer';
+import CourseContent from './pages/CourseContent';
+import MyCourses from './pages/MyCourses';
 import Login from './pages/Login';
-import { supabase } from './lib/supabase';
-import { isMobile, getDeviceType } from './pwa';
 
 function App() {
-    const [session, setSession] = useState(null);
-    const [userRole, setUserRole] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [initializing, setInitializing] = useState(true);
-    const [error, setError] = useState(null);
     const location = useLocation();
 
     useEffect(() => {
-        console.log("🚀 App initializing...");
-
-        // Handle OAuth callback hash fragment
-        const handleOAuthCallback = async () => {
-            const hashParams = window.location.hash;
-            if (hashParams && hashParams.includes('access_token')) {
-                console.log("🔑 OAuth callback detected, processing tokens...");
-
-                // Parse the hash fragment
-                const params = new URLSearchParams(hashParams.substring(1));
-                const accessToken = params.get('access_token');
-                const refreshToken = params.get('refresh_token');
-
-                if (accessToken) {
-                    console.log("🔐 Setting session from OAuth tokens...");
-                    const { data, error } = await supabase.auth.setSession({
-                        access_token: accessToken,
-                        refresh_token: refreshToken || ''
-                    });
-
-                    if (error) {
-                        console.error("❌ Error setting session:", error);
-                        return null;
-                    }
-
-                    console.log("✅ OAuth session established successfully");
-                    // Clear the hash from URL
-                    window.history.replaceState(null, '', window.location.pathname);
-                    return data.session;
-                }
-            }
-            return null;
-        };
-
-        const initSession = async () => {
-            try {
-                // First, check if this is an OAuth callback
-                const oauthSession = await handleOAuthCallback();
-
-                if (oauthSession) {
-                    console.log("✅ Using OAuth session");
-                    setSession(oauthSession);
-                    await fetchUserRole(oauthSession.user.id);
-                    setInitializing(false);
-                    return;
-                }
-
-                // Otherwise, check for existing session
-                console.log("📡 Checking Supabase connection...");
-                const { data: { session }, error } = await supabase.auth.getSession();
-
-                if (error) {
-                    console.error("❌ Supabase error:", error);
-                    throw error;
-                }
-
-                console.log("✅ Session check complete:", session ? "Logged in" : "Not logged in");
-                setSession(session);
-
-                if (session) {
-                    console.log("👤 Fetching user role for:", session.user.email);
-                    await fetchUserRole(session.user.id);
-                }
-            } catch (err) {
-                console.error("💥 Auth initialization error:", err);
-                setError(err.message);
-            } finally {
-                console.log("✅ Initialization complete");
-                setInitializing(false);
-            }
-        };
-
-        initSession();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log("🔄 Auth state changed:", _event, session?.user?.email);
-            setSession(session);
-            if (session) {
-                await fetchUserRole(session.user.id);
-            } else {
-                setUserRole(null);
-            }
+        // Verificar si hay sesión activa
+        const checkSession = () => {
+            const adminLoggedIn = sessionStorage.getItem('adminLoggedIn');
+            setIsLoggedIn(adminLoggedIn === 'true');
             setInitializing(false);
-        });
-
-        return () => {
-            console.log("🧹 Cleaning up auth subscription");
-            subscription.unsubscribe();
         };
+
+        checkSession();
+
+        // Escuchar cambios en sessionStorage
+        const handleStorageChange = () => {
+            checkSession();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    const fetchUserRole = async (userId) => {
-        try {
-            console.log("🔍 Fetching role for user:", userId);
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', userId)
-                .single();
-
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    console.log("⚠️ Profile not found, creating default student profile...");
-                    const { data: profile, error: insertError } = await supabase
-                        .from('profiles')
-                        .insert([{
-                            id: userId,
-                            role: 'student',
-                            payment_status: 'unpaid',
-                            full_name: 'Nuevo Usuario'
-                        }])
-                        .select()
-                        .single();
-
-                    if (insertError) {
-                        console.error("❌ Error creating profile:", insertError);
-                    } else {
-                        console.log("✅ Profile created:", profile);
-                        setUserRole(profile.role);
-                    }
-                } else {
-                    console.error("❌ Database error:", error);
-                    throw error;
-                }
-            } else if (data) {
-                console.log("✅ User role:", data.role);
-                setUserRole(data.role);
-            }
-        } catch (e) {
-            console.error("💥 Error in fetchUserRole:", e);
-        }
-    };
-
-    const isAdmin = userRole === 'admin' || userRole === 'author';
-    const isStudent = userRole === 'student';
     const isAuthPage = location.pathname === '/login';
-
-    console.log("🎯 Current state:", { initializing, session, userRole, isAdmin, isStudent, isAuthPage });
-    if (error) {
-        console.error("[ERROR]", error);
-    }
-    if (!initializing) {
-        console.log("[SESSION]", session);
-        console.log("[USER ROLE]", userRole);
-    }
+    const userRole = sessionStorage.getItem('userRole') || 'admin';
 
     if (initializing) {
         return (
@@ -181,90 +51,81 @@ function App() {
                 gap: '1rem',
                 fontFamily: 'Inter, sans-serif'
             }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', animation: 'pulse 2s infinite' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
                     🎓 Apolo Academy
                 </div>
                 <div style={{ fontSize: '1rem', color: '#94a3b8' }}>
-                    Cargando sistema...
-                </div>
-                {error && (
-                    <div style={{
-                        color: '#ef4444',
-                        marginTop: '1rem',
-                        padding: '1rem',
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        borderRadius: '8px',
-                        maxWidth: '400px',
-                        textAlign: 'center'
-                    }}>
-                        <strong>Error de conexión:</strong><br />
-                        {error}
-                    </div>
-                )}
-                <div style={{
-                    marginTop: '2rem',
-                    padding: '1rem',
-                    background: 'rgba(30, 41, 59, 0.5)',
-                    borderRadius: '8px',
-                    maxWidth: '500px',
-                    color: '#fbbf24',
-                    fontSize: '0.95rem',
-                    textAlign: 'left'
-                }}>
-                    <strong>Debug info:</strong><br />
-                    <pre style={{ color: '#fbbf24', fontSize: '0.85rem', overflowX: 'auto' }}>
-                        {JSON.stringify({ initializing, session, userRole, error }, null, 2)}
-                    </pre>
+                    Cargando...
                 </div>
             </div>
         );
     }
 
-    if (!session && !isAuthPage) {
-        console.log("🔒 No session, redirecting to login");
+    // Si no está logueado y no está en la página de login, redirigir
+    if (!isLoggedIn && !isAuthPage) {
         return <Navigate to="/login" replace />;
+    }
+
+    // Si está logueado y está en login, redirigir según rol
+    if (isLoggedIn && isAuthPage) {
+        const userRole = sessionStorage.getItem('userRole');
+        if (userRole === 'author') {
+            return <Navigate to="/admin/courses" replace />;
+        }
+        return <Navigate to="/admin" replace />;
     }
 
     return (
         <div className="app-container">
-            {!isAuthPage && isAdmin && <Sidebar />}
+            {!isAuthPage && isLoggedIn && <Sidebar />}
 
-            <main className={`main-content ${!isAuthPage && isAdmin ? 'with-sidebar' : ''} ${!isAuthPage && isStudent ? 'with-mobile-nav' : ''}`}>
+            <main className={`main-content ${!isAuthPage && isLoggedIn ? 'with-sidebar' : ''}`}>
                 <Routes>
                     <Route path="/login" element={<Login />} />
 
                     {/* Admin Routes */}
-                    {isAdmin && (
-                        <>
-                            <Route path="/admin" element={<AdminDashboard />} />
-                            <Route path="/admin/courses" element={<CourseManagement />} />
-                            <Route path="/admin/courses/:id" element={<CurriculumBuilder />} />
-                            <Route path="/admin/users" element={<UserManagement />} />
-                            <Route path="/" element={<Navigate to="/admin" replace />} />
-                        </>
-                    )}
+                    <Route path="/admin" element={
+                        isLoggedIn && userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />
+                    } />
+                    <Route path="/admin/courses" element={
+                        isLoggedIn && (userRole === 'admin' || userRole === 'author') ? <CourseManagement /> : <Navigate to="/login" replace />
+                    } />
+                    <Route path="/admin/courses/:id" element={
+                        isLoggedIn && (userRole === 'admin' || userRole === 'author') ? <CurriculumBuilder /> : <Navigate to="/login" replace />
+                    } />
+                    <Route path="/admin/users" element={
+                        isLoggedIn && userRole === 'admin' ? <UserManagement /> : <Navigate to="/login" replace />
+                    } />
+                    <Route path="/admin/teachers" element={
+                        isLoggedIn && userRole === 'admin' ? <TeacherManagement /> : <Navigate to="/login" replace />
+                    } />
 
-                    {/* Student Routes */}
-                    {isStudent && (
-                        <>
-                            <Route path="/student" element={<StudentHome />} />
-                            <Route path="/student/my-courses" element={<MyCourses />} />
-                            <Route path="/student/lesson/:id" element={<LessonPlayer />} />
-                            <Route path="/" element={<Navigate to="/student" replace />} />
-                        </>
-                    )}
+                    {/* Student/Teacher Courses Routes */}
+                    <Route path="/courses" element={
+                        isLoggedIn && (userRole === 'author' || userRole === 'student') ? <MyCourses /> : <Navigate to="/login" replace />
+                    } />
+                    <Route path="/courses/:id" element={
+                        isLoggedIn && (userRole === 'author' || userRole === 'student') ? <CourseContent /> : <Navigate to="/login" replace />
+                    } />
 
+                    {/* Default route based on role */}
+                    <Route path="/" element={
+                        isLoggedIn ? (
+                            userRole === 'admin' ? <Navigate to="/admin" replace /> :
+                            userRole === 'author' ? <Navigate to="/admin/courses" replace /> :
+                            <Navigate to="/courses" replace />
+                        ) : <Navigate to="/login" replace />
+                    } />
+
+                    {/* Catch-all */}
                     <Route path="*" element={
-                        session ? (
-                            isAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/student" replace />
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
+                        isLoggedIn ? (
+                            userRole === 'admin' ? <Navigate to="/admin" replace /> :
+                            <Navigate to="/courses" replace />
+                        ) : <Navigate to="/login" replace />
                     } />
                 </Routes>
             </main>
-
-            {!isAuthPage && isStudent && <MobileNav />}
         </div>
     );
 }
