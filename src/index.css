@@ -868,3 +868,4 @@ button.w-full {
         margin-left: 0;
     }
 }
+.divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: var(--text-muted); font-size: 0.875rem; } .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--glass-border); } .divider:not(:empty)::before { margin-right: .5em; } .divider:not(:empty)::after { margin-left: .5em; } .toggle-auth { margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted); } .toggle-auth button { background: none; border: none; color: var(--primary); font-weight: 600; margin-left: 0.5rem; cursor: pointer; text-decoration: underline; }
