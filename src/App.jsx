@@ -15,34 +15,49 @@ import { supabase } from './lib/supabase';
 function App() {
     const [session, setSession] = useState(null);
     const [userRole, setUserRole] = useState(null);
+    const [initializing, setInitializing] = useState(true);
     const location = useLocation();
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             if (session) fetchUserRole(session.user.id);
+            setInitializing(false);
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             if (session) fetchUserRole(session.user.id);
+            setInitializing(false);
         });
 
         return () => subscription.unsubscribe();
     }, []);
 
     const fetchUserRole = async (userId) => {
-        const { data } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', userId)
-            .single();
-        if (data) setUserRole(data.role);
+        try {
+            const { data } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single();
+            if (data) setUserRole(data.role);
+        } catch (e) {
+            console.error("Role error:", e);
+        }
     };
 
     const isAdmin = userRole === 'admin' || userRole === 'author';
     const isStudent = userRole === 'student';
     const isAuthPage = location.pathname === '/login';
+
+    if (initializing) {
+        return (
+            <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'white' }}>
+                <div className="animate-pulse">Cargando Apolo Academy...</div>
+            </div>
+        );
+    }
 
     if (!session && !isAuthPage) {
         return <Navigate to="/login" />;
