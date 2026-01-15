@@ -86,22 +86,33 @@ function App() {
     const fetchUserRole = async (userId) => {
         try {
             console.log("🔍 Fetching role for user:", userId);
+
+            // Get user email for better profile creation
+            const { data: { user } } = await supabase.auth.getUser();
+            const userEmail = user?.email || '';
+
             const { data, error } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('role, email, full_name')
                 .eq('id', userId)
                 .single();
 
             if (error) {
                 if (error.code === 'PGRST116') {
                     console.log("⚠️ Profile not found, creating default student profile...");
+
+                    // Extract name from email
+                    const emailName = userEmail.split('@')[0];
+                    const fullName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+
                     const { data: profile, error: insertError } = await supabase
                         .from('profiles')
                         .insert([{
                             id: userId,
+                            email: userEmail,
                             role: 'student',
                             payment_status: 'unpaid',
-                            full_name: 'Nuevo Usuario'
+                            full_name: fullName
                         }])
                         .select()
                         .single();
@@ -183,13 +194,52 @@ function App() {
                     <Route path="/login" element={<Login />} />
 
                     {/* Admin Routes */}
-                    {isAdmin && (
+                    {isAdmin ? (
                         <>
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/admin/courses" element={<CourseManagement />} />
                             <Route path="/admin/courses/:id" element={<CurriculumBuilder />} />
                             <Route path="/admin/users" element={<UserManagement />} />
                             <Route path="/" element={<Navigate to="/admin" replace />} />
+                        </>
+                    ) : session && (
+                        <>
+                            {/* Redirect non-admin users trying to access admin routes */}
+                            <Route path="/admin/*" element={
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '100vh',
+                                    background: '#0f172a',
+                                    color: 'white',
+                                    textAlign: 'center',
+                                    padding: '2rem'
+                                }}>
+                                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+                                    <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Acceso Restringido</h1>
+                                    <p style={{ color: '#94a3b8', marginBottom: '2rem', maxWidth: '500px' }}>
+                                        No tienes permisos para acceder al panel de administración.
+                                        Si crees que esto es un error, contacta al administrador del sistema.
+                                    </p>
+                                    <button
+                                        onClick={() => window.location.href = '/student'}
+                                        style={{
+                                            background: 'var(--primary)',
+                                            color: 'white',
+                                            padding: '0.75rem 2rem',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontSize: '1rem',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        Ir a Mi Panel
+                                    </button>
+                                </div>
+                            } />
                         </>
                     )}
 
