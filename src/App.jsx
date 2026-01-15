@@ -24,6 +24,22 @@ function App() {
 
         const initSession = async () => {
             try {
+                // Check if we have an OAuth callback with hash fragment
+                const hashParams = window.location.hash;
+                if (hashParams && hashParams.includes('access_token')) {
+                    console.log("🔑 OAuth callback detected, processing tokens...");
+                    // Supabase will automatically handle the hash fragment
+                    // We just need to wait for it to process
+                    const { data, error: hashError } = await supabase.auth.getSession();
+                    if (hashError) {
+                        console.error("❌ Error processing OAuth callback:", hashError);
+                    } else if (data.session) {
+                        console.log("✅ OAuth session established");
+                        // Clear the hash from URL for cleaner appearance
+                        window.history.replaceState(null, '', window.location.pathname);
+                    }
+                }
+
                 console.log("📡 Checking Supabase connection...");
                 const { data: { session }, error } = await supabase.auth.getSession();
 
