@@ -49,6 +49,27 @@ const CurriculumBuilder = () => {
         pdfFile: null,
         wordFile: null
     });
+    const [filePreviewUrls, setFilePreviewUrls] = useState({
+        pdf: null,
+        video: null,
+        word: null
+    });
+
+    const getEmbedUrl = (url) => {
+        if (!url) return null;
+        
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/);
+            return videoId ? `https://www.youtube.com/embed/${videoId[1]}` : null;
+        }
+        
+        if (url.includes('vimeo.com')) {
+            const videoId = url.match(/vimeo\.com\/(\d+)/);
+            return videoId ? `https://player.vimeo.com/video/${videoId[1]}` : null;
+        }
+        
+        return url;
+    };
 
     useEffect(() => {
         fetchCourseAndSections();
@@ -249,6 +270,12 @@ const CurriculumBuilder = () => {
                 pdfFile: null,
                 wordFile: null
             });
+            const embedUrl = getEmbedUrl(lesson.video_url);
+            setFilePreviewUrls({ 
+                pdf: null, 
+                video: (embedUrl && embedUrl !== lesson.video_url) ? embedUrl : null,
+                word: null 
+            });
             setEditingLesson(lesson);
         } else {
             setLessonForm({
@@ -264,6 +291,7 @@ const CurriculumBuilder = () => {
                 pdfFile: null,
                 wordFile: null
             });
+            setFilePreviewUrls({ pdf: null, video: null, word: null });
             setEditingLesson(null);
         }
         setShowLessonModal(true);
@@ -344,10 +372,13 @@ const CurriculumBuilder = () => {
         if (file) {
             if (type === 'video') {
                 setLessonForm(prev => ({ ...prev, videoFile: file, video_url: file.name }));
+                setFilePreviewUrls(prev => ({ ...prev, video: URL.createObjectURL(file) }));
             } else if (type === 'pdf') {
                 setLessonForm(prev => ({ ...prev, pdfFile: file, pdf_url: file.name }));
+                setFilePreviewUrls(prev => ({ ...prev, pdf: URL.createObjectURL(file) }));
             } else if (type === 'word') {
                 setLessonForm(prev => ({ ...prev, wordFile: file, word_url: file.name }));
+                setFilePreviewUrls(prev => ({ ...prev, word: URL.createObjectURL(file) }));
             }
         }
     };
@@ -646,17 +677,19 @@ const CurriculumBuilder = () => {
                                 </select>
                             </div>
 
-                            <div className="form-group">
-                                <label>Duración (minutos)</label>
-                                <input
-                                    type="number"
-                                    value={lessonForm.duration_minutes}
-                                    onChange={e => setLessonForm({ ...lessonForm, duration_minutes: e.target.value })}
-                                    placeholder="30"
-                                    min="0"
-                                    disabled={saving}
-                                />
-                            </div>
+                            {lessonForm.content_type === 'video' && (
+                                <div className="form-group">
+                                    <label>Duración (minutos)</label>
+                                    <input
+                                        type="number"
+                                        value={lessonForm.duration_minutes}
+                                        onChange={e => setLessonForm({ ...lessonForm, duration_minutes: e.target.value })}
+                                        placeholder="30"
+                                        min="0"
+                                        disabled={saving}
+                                    />
+                                </div>
+                            )}
 
                             {lessonForm.content_type === 'video' && (
                                 <div className="form-group full-width">
@@ -686,6 +719,35 @@ const CurriculumBuilder = () => {
                                         <p className="file-selected">
                                             <CheckCircle size={14} /> Archivo seleccionado: {lessonForm.videoFile.name}
                                         </p>
+                                    )}
+                                    {(lessonForm.video_url || lessonForm.videoFile) && (
+                                        <div className="file-preview">
+                                            <span className="preview-label"><CheckCircle size={14} /> Video configurado correctamente</span>
+                                            <p className="file-path" style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                                                <span style={{fontSize: '0.7rem', padding: '0.1rem 0.3rem', borderRadius: '3px', background: lessonForm.videoFile ? 'var(--success-bg)' : 'var(--info-bg)', color: lessonForm.videoFile ? 'var(--success-text)' : 'var(--info-text)'}}>
+                                                    {lessonForm.videoFile ? '📁 Local' : '🌐 URL'}
+                                                </span>
+                                                <span>{lessonForm.videoFile ? lessonForm.videoFile.name : lessonForm.video_url}</span>
+                                            </p>
+                                        </div>
+                                    )}
+                                    {(filePreviewUrls.video || lessonForm.video_url) && (
+                                        <div className="video-embed-preview" style={{marginTop: '0.5rem', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--surface)'}}>
+                                            {filePreviewUrls.video ? (
+                                                <video controls style={{width: '100%', maxHeight: '200px'}}>
+                                                    <source src={filePreviewUrls.video} type={lessonForm.videoFile?.type || 'video/mp4'} />
+                                                    Tu navegador no soporta el elemento de video.
+                                                </video>
+                                            ) : (
+                                                <iframe 
+                                                    src={getEmbedUrl(lessonForm.video_url)}
+                                                    style={{width: '100%', height: '200px', border: 'none'}}
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                    title="Vista previa del video"
+                                                />
+                                            )}
+                                        </div>
                                     )}
                                     {uploadProgress.videos > 0 && uploadProgress.videos < 100 && (
                                         <div className="upload-progress">
@@ -724,6 +786,34 @@ const CurriculumBuilder = () => {
                                             <CheckCircle size={14} /> Archivo seleccionado: {lessonForm.pdfFile.name}
                                         </p>
                                     )}
+                                    {(lessonForm.pdf_url || lessonForm.pdfFile) && (
+                                        <div className="file-preview">
+                                            <a 
+                                                href={filePreviewUrls.pdf || lessonForm.pdf_url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="btn btn-outline btn-sm"
+                                                style={{marginRight: '0.5rem'}}
+                                            >
+                                                <FileText size={14} /> Ver PDF
+                                            </a>
+                                            <p className="file-path" style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                                                <span style={{fontSize: '0.7rem', padding: '0.1rem 0.3rem', borderRadius: '3px', background: lessonForm.pdfFile ? 'var(--success-bg)' : 'var(--info-bg)', color: lessonForm.pdfFile ? 'var(--success-text)' : 'var(--info-text)'}}>
+                                                    {lessonForm.pdfFile ? '📁 Local' : '🌐 URL'}
+                                                </span>
+                                                <span>{lessonForm.pdfFile ? lessonForm.pdfFile.name : lessonForm.pdf_url}</span>
+                                            </p>
+                                        </div>
+                                    )}
+                                    {(filePreviewUrls.pdf || lessonForm.pdf_url) && (
+                                        <div className="pdf-embed-preview" style={{marginTop: '0.5rem', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--surface)'}}>
+                                            <iframe 
+                                                src={filePreviewUrls.pdf || `${lessonForm.pdf_url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                                style={{width: '100%', height: '250px', border: 'none'}} 
+                                                title="Vista previa del PDF"
+                                            />
+                                        </div>
+                                    )}
                                     {uploadProgress.documents > 0 && uploadProgress.documents < 100 && (
                                         <div className="upload-progress">
                                             <div className="progress-bar" style={{ width: `${uploadProgress.documents}%` }} />
@@ -755,10 +845,15 @@ const CurriculumBuilder = () => {
                                             />
                                         </label>
                                     </div>
-                                    {lessonForm.wordFile && (
-                                        <p className="file-selected">
-                                            <CheckCircle size={14} /> Archivo seleccionado: {lessonForm.wordFile.name}
-                                        </p>
+                                    {(lessonForm.word_url || lessonForm.wordFile) && (
+                                        <div className="file-preview">
+                                            <p className="file-path" style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                                                <span style={{fontSize: '0.7rem', padding: '0.1rem 0.3rem', borderRadius: '3px', background: lessonForm.wordFile ? 'var(--success-bg)' : 'var(--info-bg)', color: lessonForm.wordFile ? 'var(--success-text)' : 'var(--info-text)'}}>
+                                                    {lessonForm.wordFile ? '📁 Local' : '🌐 URL'}
+                                                </span>
+                                                <span>{lessonForm.wordFile ? lessonForm.wordFile.name : lessonForm.word_url}</span>
+                                            </p>
+                                        </div>
                                     )}
                                     {uploadProgress.documents > 0 && uploadProgress.documents < 100 && (
                                         <div className="upload-progress">
@@ -778,6 +873,14 @@ const CurriculumBuilder = () => {
                                         rows={8}
                                         disabled={saving}
                                     />
+                                    {lessonForm.content_html && (
+                                        <div className="html-preview">
+                                            <details>
+                                                <summary>Vista previa del contenido</summary>
+                                                <div className="preview-content" dangerouslySetInnerHTML={{ __html: lessonForm.content_html }} />
+                                            </details>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

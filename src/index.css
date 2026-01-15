@@ -9,8 +9,17 @@
     --text: #f8fafc;
     --text-muted: #94a3b8;
     --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.1);
+    --success-text: #10b981;
     --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.1);
+    --warning-text: #f59e0b;
     --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.1);
+    --danger-text: #ef4444;
+    --info: #3b82f6;
+    --info-bg: rgba(59, 130, 246, 0.1);
+    --info-text: #3b82f6;
     --glass: rgba(30, 41, 59, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --font-heading: 'Outfit', sans-serif;
@@ -1594,6 +1603,44 @@ button.w-full {
     font-size: 0.875rem;
     color: var(--success);
     margin-top: 0.5rem;
+}
+
+.file-preview {
+    margin-top: 0.75rem;
+}
+
+.preview-label {
+    font-size: 0.75rem;
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.html-preview {
+    margin-top: 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.html-preview summary {
+    padding: 0.75rem 1rem;
+    background: var(--surface-light);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.html-preview summary:hover {
+    background: var(--surface);
+}
+
+.preview-content {
+    padding: 1rem;
+    background: var(--glass);
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .upload-progress {

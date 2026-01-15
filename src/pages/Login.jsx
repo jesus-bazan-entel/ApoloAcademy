@@ -91,7 +91,7 @@ const Login = () => {
                             <h2>Panel Administrativo</h2>
                             <p className="tagline-final">
                                 <Shield size={14} className="sparkle" />
-                                IESTP Gilda Ballivián Rosado
+                                Centro de Preparación para el IESTP Gilda Ballivián Rosado
                                 <Shield size={14} className="sparkle" />
                             </p>
                         </div>
