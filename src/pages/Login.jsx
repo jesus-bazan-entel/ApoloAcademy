@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Mail, Lock, LogIn, Chrome, UserPlus } from 'lucide-react';
+import { Mail, Lock, LogIn, Chrome, UserPlus, Sparkles } from 'lucide-react';
+import '../styles/login-modern.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const Login = () => {
                     password,
                     options: {
                         data: {
-                            full_name: email.split('@')[0], // Default name
+                            full_name: email.split('@')[0],
                         }
                     }
                 });
@@ -49,21 +50,44 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card glass-card animate-fade-in">
-                <div className="logo-container">
-                    <img src="/logo-lapregilda.jpg" alt="LAPREGILDA" className="login-logo" />
-                </div>
-                <h1 className="gradient-text">LAPREGILDA</h1>
-                <p className="subtitle">
-                    {isRegistering
-                        ? 'Crea tu cuenta de estudiante'
-                        : 'Centro de Preparación Académica - IESTP Gilda Ballivián Rosado'}
-                </p>
+        <div className="login-container-modern">
+            {/* Animated Background */}
+            <div className="login-bg-animation">
+                <div className="floating-shape shape-1"></div>
+                <div className="floating-shape shape-2"></div>
+                <div className="floating-shape shape-3"></div>
+            </div>
 
-                <form onSubmit={handleAuth}>
-                    <div className="input-group">
-                        <Mail size={18} />
+            <div className="login-card-modern glass-card-modern animate-fade-in">
+                {/* Logo Section */}
+                <div className="logo-section">
+                    <img src="/logo-lapregilda.jpg" alt="LAPREGILDA" className="login-logo-modern" />
+                    <div className="tagline">
+                        <Sparkles size={16} className="sparkle-icon" />
+                        <span>Tu camino al IESTP Gilda Ballivián Rosado</span>
+                        <Sparkles size={16} className="sparkle-icon" />
+                    </div>
+                </div>
+
+                {/* Tab Switcher */}
+                <div className="auth-tabs">
+                    <button
+                        className={`auth-tab ${!isRegistering ? 'active' : ''}`}
+                        onClick={() => setIsRegistering(false)}
+                    >
+                        Iniciar Sesión
+                    </button>
+                    <button
+                        className={`auth-tab ${isRegistering ? 'active' : ''}`}
+                        onClick={() => setIsRegistering(true)}
+                    >
+                        Registrarse
+                    </button>
+                </div>
+
+                <form onSubmit={handleAuth} className="auth-form">
+                    <div className="input-group-modern">
+                        <Mail size={20} className="input-icon" />
                         <input
                             type="email"
                             placeholder="Correo electrónico"
@@ -72,8 +96,8 @@ const Login = () => {
                             required
                         />
                     </div>
-                    <div className="input-group">
-                        <Lock size={18} />
+                    <div className="input-group-modern">
+                        <Lock size={20} className="input-icon" />
                         <input
                             type="password"
                             placeholder="Contraseña"
@@ -82,27 +106,36 @@ const Login = () => {
                             required
                         />
                     </div>
-                    {error && <p className="error-message">{error}</p>}
 
-                    <button className="btn btn-primary w-full" disabled={loading}>
-                        {loading ? 'Procesando...' : (isRegistering ? 'Registrarse' : 'Iniciar Sesión')}
-                        {isRegistering ? <UserPlus size={20} /> : <LogIn size={20} />}
+                    {error && <div className="error-message-modern">{error}</div>}
+
+                    <button className="btn-modern btn-primary-modern" disabled={loading}>
+                        {loading ? (
+                            <span className="loading-spinner"></span>
+                        ) : (
+                            <>
+                                {isRegistering ? 'Crear Cuenta' : 'Entrar'}
+                                {isRegistering ? <UserPlus size={20} /> : <LogIn size={20} />}
+                            </>
+                        )}
                     </button>
                 </form>
 
-                <div className="divider">
+                <div className="divider-modern">
                     <span>o continúa con</span>
                 </div>
 
-                <button className="btn btn-outline w-full" onClick={handleGoogleLogin}>
+                <button className="btn-modern btn-google" onClick={handleGoogleLogin}>
                     <Chrome size={20} />
                     Google
                 </button>
 
-                <p className="toggle-auth">
-                    {isRegistering ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'}
-                    <button onClick={() => setIsRegistering(!isRegistering)}>
-                        {isRegistering ? 'Inicia sesión' : 'Regístrate aquí'}
+                <p className="footer-text">
+                    {isRegistering
+                        ? '¿Ya tienes cuenta? '
+                        : '¿Primera vez aquí? '}
+                    <button className="link-button" onClick={() => setIsRegistering(!isRegistering)}>
+                        {isRegistering ? 'Inicia sesión' : 'Regístrate gratis'}
                     </button>
                 </p>
             </div>

@@ -1,0 +1,339 @@
+/* Modern Login Styles */
+.login-container-modern {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    overflow: hidden;
+}
+
+/* Animated Background */
+.login-bg-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: float 20s infinite ease-in-out;
+}
+
+.shape-1 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 350px;
+    height: 350px;
+    background: linear-gradient(135deg, #ec4899, #f59e0b);
+    bottom: -100px;
+    right: -100px;
+    animation-delay: 5s;
+}
+
+.shape-3 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 10s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+/* Modern Card */
+.login-card-modern {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 440px;
+    padding: 2.5rem;
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-modern {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(20px);
+}
+
+/* Logo Section */
+.logo-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo-modern {
+    width: 200px;
+    height: auto;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.login-logo-modern:hover {
+    transform: scale(1.05);
+}
+
+.tagline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.75rem;
+}
+
+.sparkle-icon {
+    color: #f59e0b;
+    animation: sparkle 2s infinite;
+}
+
+@keyframes sparkle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Tab Switcher */
+.auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 0.75rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Form */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-group-modern {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-group-modern input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group-modern input:focus {
+    border-color: #6366f1;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.input-group-modern input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Buttons */
+.btn-modern {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary-modern:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+}
+
+.btn-primary-modern:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-google {
+    background: white;
+    color: #1f2937;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-google:hover {
+    background: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Divider */
+.divider-modern {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.divider-modern::before,
+.divider-modern::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider-modern span {
+    padding: 0 1rem;
+}
+
+/* Error Message */
+.error-message-modern {
+    padding: 0.75rem 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Footer */
+.footer-text {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: #6366f1;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    margin-left: 0.25rem;
+}
+
+.link-button:hover {
+    color: #8b5cf6;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .login-card-modern {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+    }
+
+    .login-logo-modern {
+        width: 160px;
+    }
+
+    .floating-shape {
+        filter: blur(60px);
+    }
+}
