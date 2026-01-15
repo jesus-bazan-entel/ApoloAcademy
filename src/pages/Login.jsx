@@ -41,13 +41,23 @@ const Login = () => {
     };
 
     const handleGoogleLogin = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) {
+                if (error.message.includes('not enabled')) {
+                    setError('El inicio de sesión con Google no está habilitado. Por favor, usa tu correo y contraseña.');
+                } else {
+                    setError(error.message);
+                }
             }
-        });
-        if (error) setError(error.message);
+        } catch (err) {
+            setError('Error al conectar con Google. Intenta con correo y contraseña.');
+        }
     };
 
     return (
