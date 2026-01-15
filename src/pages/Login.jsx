@@ -56,7 +56,7 @@ const Login = () => {
             <div className="login-clean-card">
                 {/* Logo */}
                 <div className="login-clean-logo">
-                    <img src="/logo-lapregilda.jpg" alt="LAPREGILDA" />
+                    <img src="/logo-lapregilda-text.png" alt="LAPREGILDA" />
                 </div>
 
                 {/* Tagline */}
